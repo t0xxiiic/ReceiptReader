@@ -1,8 +1,6 @@
 package com.company;
-
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 
 public class Main {
@@ -11,21 +9,36 @@ public class Main {
     public static String file;
     public static ArrayList<String> time = new ArrayList<>();
     public static ArrayList<String> amount = new ArrayList<>();
-    public static String startDate = "09-06", endDate = "10-06";
+    public static String startDate = "01-09", endDate = "02-09";
+    public static ArrayList<Double> cleanAmounts = new ArrayList<>();
 
 
     public static void main(String[] args) {
         file = openFile();
-        convertFile(file);
+        getReceipts(file);
 
         System.out.println(amount.size());
         System.out.println(time.size());
+        convertStringToDouble(amount);
 
         System.out.println("  Bills For " + startDate + " are: \n" + "````````````````````````");
 
         for(int i = 0; i < time.size(); i++){
             System.out.println("Amount: " + amount.get(i) + " @ " + time.get(i));
         }
+
+        System.out.println("Clean amounts are: ");
+        for(double i : cleanAmounts){
+            System.out.print(i + ", ");
+        }
+        System.out.println();
+
+        System.out.println("  Bills For " + startDate + " are: \n" + "````````````````````````");
+        for(int i = 0; i < time.size(); i++){
+            System.out.println("Amount("+ (i+1) + "): " + cleanAmounts.get(i) + "лв. " + "@ " + time.get(i) + "ч.");
+        }
+
+        writeReceiptsToFile();
     }
 
     //All methods are located under here:
@@ -43,7 +56,7 @@ public class Main {
         return directory + file;
     } //Opens a File Dialog to choose a file and then returns its path.
 
-    public static void convertFile(String file) {
+    public static void getReceipts(String file) {
 
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
@@ -66,6 +79,40 @@ public class Main {
             bufferedReader.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void writeReceiptsToFile(){
+        try{
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Receipts.txt", true));
+            bufferedWriter.newLine();
+            bufferedWriter.write("Receipts for " + startDate + " are: ");
+            bufferedWriter.newLine();
+            bufferedWriter.write("````````````````````````");
+            bufferedWriter.newLine();
+            for(int i = 0; i < time.size(); i++){
+                bufferedWriter.write("Amount("+ (i+1) + "): " + cleanAmounts.get(i) + "лв. " + "@ " + time.get(i) + "ч.");
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void convertStringToDouble(ArrayList<String> amount){
+        char[] container;
+        int counter = 0;
+
+        for(int i = 0; i < amount.size(); i++){
+            container = amount.get(i).toCharArray();
+            for(int j = 0; j < 4; j++){
+                if(container[j] == '.'){
+                    counter++;
+                }
+            }
+            cleanAmounts.add(Double.parseDouble(amount.get(i).substring(counter)));
+            counter = 0;
         }
     }
 }
